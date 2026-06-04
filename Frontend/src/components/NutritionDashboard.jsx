@@ -68,39 +68,68 @@ const handlePredict = async (e) => {
     setPrediction(null);
 
     try {
-      ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
+      // 1. Ambil data mentah dari state UI React (foodData)
+      const fat = Number(foodData.fat) || 0;
+      const carbs = Number(foodData.carbohydrates) || 0;
+      const protein = Number(foodData.protein) || 0;
+      const fiber = Number(foodData.fiber) || 0;
+      const sugar = Number(foodData.sugar) || 0;
+      const water = Number(foodData.water) || 0; 
+      const inputCalories = Number(foodData.calories) || 0;
+      const epsilon = 1e-5;
 
-      // Pastikan nama file sesuai dengan file Classification terbaru
-      const session = await ort.InferenceSession.create('/food_health_classifier.onnx');
+      // ==========================================================
+      // 2. GERBANG ATURAN MUTLAK DARI TEMANMU (SANG SATPAM)
+      // ==========================================================
+      if (
+        inputCalories > 800 || 
+        sugar > 40 || 
+        fat > 35 ||
+        (sugar / (carbs + epsilon)) > 0.5
+      ) {
+        console.log("=== HYBRID AI RULE ===");
+        console.log("Junk food terdeteksi! Langsung divonis Unhealthy tanpa panggil AI.");
+        setPrediction('Unhealthy');
+        setLoading(false);
+        return; // 🛑 RETURN DI SINI! Hentikan fungsi agar tidak capek-capek memanggil ONNX
+      }
+
+      // ==========================================================
+      // 3. JIKA LOLOS SATPAM, BARU TANYA KE MODEL AI ONNX
+      // ==========================================================
+      ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
       
-      const inputData = Float32Array.from([
-        Number(foodData.calories), 
-        Number(foodData.protein), 
-        Number(foodData.fat),
-        Number(foodData.carbohydrates), 
-        Number(foodData.fiber), 
-        Number(foodData.sugar)
-      ]);
+      // PASTIKAN NAMA FILE SESUAI
+      const session = await ort.InferenceSession.create('/food_health_classifier_robust.onnx');
+
+      // Feature Engineering Lanjutan
+      const calculatedCalories = (fat * 9) + (carbs * 4) + (protein * 4);
+      const calorieAnomalyScore = Math.abs(inputCalories - calculatedCalories); 
+      const sugarToCarb = sugar / (carbs + epsilon);
+      const satFatToTotalFat = 0; 
+      const fiberToCarb = fiber / (carbs + epsilon);
+      const proteinToCalorie = protein / (inputCalories + epsilon);
+
+      // Gabungkan 10 fitur
+      const ultimateFeatures = [
+        fat, carbs, protein, fiber, sugar, water,
+        sugarToCarb, satFatToTotalFat, fiberToCarb, proteinToCalorie
+      ];
+
+      const inputTensor = new ort.Tensor('float32', Float32Array.from(ultimateFeatures), [1, 10]);
+      const feeds = { [session.inputNames[0]]: inputTensor };
       
-      const tensor = new ort.Tensor('float32', inputData, [1, 6]);
-      const feeds = { [session.inputNames[0]]: tensor };
-      
-      // KUNCI PERBAIKAN: 
-      // Ambil nama output pertama (label) dan paksa session.run HANYA menarik output tersebut.
-      // Ini mencegah onnxruntime mencoba mem-parsing Map/Dictionary probabilitas yang bikin crash.
-      const labelOutputName = session.outputNames[0]; 
+      // Eksekusi ONNX
+      const labelOutputName = session.outputNames[0];
       const results = await session.run(feeds, [labelOutputName]);
       
-      // Ekstrak data klasifikasi (0 atau 1) dengan aman
       const classOutput = results[labelOutputName].data;
-      const predictionValue = classOutput[0]; 
+      const predictionValue = classOutput[0];
       
-      console.log("=== HASIL KLASIFIKASI AI ===");
-      console.log("INPUT USER:", foodData);
-      console.log("ANGKA PREDIKSI DARI AI (0/1):", predictionValue);
-      console.log("============================");
+      console.log("=== EVALUASI ML (KASUS ABU-ABU) ===");
+      console.log("Prediksi AI (0/1):", predictionValue);
       
-      // Update UI menggunakan Number() untuk menghindari isu tipe data BigInt dari ONNX
+      // Update UI dari AI
       if (Number(predictionValue) === 1) {
         setPrediction('Healthy');
       } else {
