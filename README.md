@@ -1,7 +1,6 @@
-# 🍔 Food Health Prediction Web App - Intelligent Systems
+# 🍔 Food Health Prediction Web App - Machine Learning
 
-[![Deployment Status](https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel)](https://your-vercel-link.vercel.app)
-[![Model Platform](https://img.shields.io/badge/Model%20Dashboard-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://your-streamlit-link.streamlit.app)
+[![Deployment Status](https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel)]([https://your-vercel-link.vercel.app](https://machine-learning-project-binus.vercel.app/))
 [![Academic Project](https://img.shields.io/badge/Binus%20University-Computer%20Science-blue?style=for-the-badge)](https://binus.ac.id/)
 
 Aplikasi berbasis web cerdas untuk memprediksi klasifikasi tingkat kesehatan makanan (*Healthy* vs *Unhealthy*) secara real-time menggunakan model Machine Learning **Random Forest Classifier** yang diekspor ke dalam runtime format **ONNX (Open Neural Network Exchange)** untuk komputasi sisi klien yang efisien.
