@@ -3,6 +3,7 @@
 [![Deployment Status](https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel)](https://machine-learning-project-binus.vercel.app/)
 [![Academic Project](https://img.shields.io/badge/Binus%20University-Computer%20Science-blue?style=for-the-badge)](https://binus.ac.id/)
 
+
 Web based untuk memprediksi klasifikasi tingkat kesehatan makanan (*Healthy* vs *Unhealthy*) secara real-time menggunakan model Machine Learning **Random Forest Classifier** yang diekspor ke dalam runtime format **ONNX (Open Neural Network Exchange)**.
 
 ---
